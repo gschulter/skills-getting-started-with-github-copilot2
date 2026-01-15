@@ -77,6 +77,17 @@ activities = {
         }
 }
 
+# In-memory countries and cities database
+countries = {
+    "United States": ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix"],
+    "United Kingdom": ["London", "Manchester", "Birmingham", "Leeds", "Glasgow"],
+    "France": ["Paris", "Marseille", "Lyon", "Toulouse", "Nice"],
+    "Germany": ["Berlin", "Munich", "Cologne", "Hamburg", "Frankfurt"],
+    "Japan": ["Tokyo", "Osaka", "Yokohama", "Kyoto", "Sapporo"],
+    "Canada": ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa"],
+    "Australia": ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"]
+}
+
 
 @app.get("/")
 def root():
@@ -124,3 +135,12 @@ def unregister_from_activity(activity_name: str, email: str):
     # Remove student
     activity["participants"].remove(email)
     return {"message": f"Unregistered {email} from {activity_name}"}
+
+
+@app.get("/countries/{country_name}/cities")
+def get_cities_by_country(country_name: str):
+    """Get all cities in a given country"""
+    if country_name not in countries:
+        raise HTTPException(status_code=404, detail="Country not found")
+    
+    return {"country": country_name, "cities": countries[country_name]}

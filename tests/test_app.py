@@ -83,3 +83,38 @@ def test_root_redirect():
     assert response.status_code == 200
     # FastAPI's RedirectResponse might be handled differently in tests
     # The root endpoint redirects to /static/index.html
+
+def test_get_cities_by_country():
+    # Test getting cities for United States
+    response = client.get("/countries/United%20States/cities")
+    assert response.status_code == 200
+    result = response.json()
+    assert result["country"] == "United States"
+    assert isinstance(result["cities"], list)
+    assert "New York" in result["cities"]
+    assert "Los Angeles" in result["cities"]
+    assert len(result["cities"]) == 5
+
+def test_get_cities_multiple_countries():
+    # Test getting cities for different countries
+    countries_to_test = [
+        ("Japan", ["Tokyo", "Osaka"]),
+        ("France", ["Paris", "Marseille"]),
+        ("Canada", ["Toronto", "Vancouver"])
+    ]
+    
+    for country, expected_cities in countries_to_test:
+        response = client.get(f"/countries/{country}/cities")
+        assert response.status_code == 200
+        result = response.json()
+        assert result["country"] == country
+        for city in expected_cities:
+            assert city in result["cities"]
+
+def test_get_cities_nonexistent_country():
+    # Test getting cities for a country that doesn't exist
+    response = client.get("/countries/Atlantis/cities")
+    assert response.status_code == 404
+    result = response.json()
+    assert "detail" in result
+    assert "Country not found" in result["detail"]
